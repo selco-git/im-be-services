@@ -42,11 +42,14 @@ public class IMService {
 
     @Autowired
     private IncidentService incidentService;
+    
+    @Autowired
+    private NotificationService notificationService;
 
 
     public IMService(EnrichmentService enrichmentService, UserService userService, WorkflowService workflowService,
                       ServiceRequestValidator serviceRequestValidator, ServiceRequestValidator validator, Producer producer,
-                      IMConfiguration config, IMRepository repository,IncidentService incidentService) {
+                      IMConfiguration config, IMRepository repository,IncidentService incidentService,NotificationService notificationService) {
         this.enrichmentService = enrichmentService;
         this.userService = userService;
         this.workflowService = workflowService;
@@ -57,6 +60,7 @@ public class IMService {
         this.repository = repository;
         this.incidentService=incidentService;
     }
+    
 
 
     /**
@@ -69,6 +73,7 @@ public class IMService {
         enrichmentService.enrichCreateRequest(request);
         workflowService.updateWorkflowStatus(request);
         incidentService.save(request.getIncident());
+        notificationService.process(request, null);
         return request;
     }
 

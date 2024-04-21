@@ -10,19 +10,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages={
+		"org.egov.im", "org,egov.im.service"})
 @EnableCaching
+@EnableJpaRepositories
+@ComponentScan({"org.egov.im","org.egov.im.service"})
 @EntityScan(basePackages="org.egov.im.entity")
+@EnableConfigurationProperties
 @Import({TracerConfiguration.class, MultiStateInstanceUtil.class})
 public class IMApp{
 

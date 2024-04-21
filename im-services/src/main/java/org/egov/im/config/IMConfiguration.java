@@ -155,6 +155,10 @@ public class IMConfiguration {
 
     @Value("#{${egov.ui.app.host.map}}")
     private Map<String, String> uiAppHostMap;
+    
+    
+    @Value("#{${egov.im.msg.list}}")
+    private Map<String,String> egovIMMsgList;
 
     @Value("${egov.im.events.rate.link}")
     private String rateLink;

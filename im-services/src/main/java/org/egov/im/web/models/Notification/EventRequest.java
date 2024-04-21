@@ -45,6 +45,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.egov.im.entity.Event;
 import org.egov.im.web.models.RequestInfo;
 import org.springframework.validation.annotation.Validated;
 
