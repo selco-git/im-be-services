@@ -9,11 +9,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.egov.im.entity.User;
 import org.egov.im.entity.Action;
 import org.egov.im.entity.Document;
 import org.egov.im.entity.ProcessInstance;
 import org.egov.im.entity.State;
-import org.egov.im.entity.User;
+import org.egov.im.entity.Users;
 import org.egov.im.web.models.AuditDetails;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -91,7 +92,7 @@ public class WorkflowRowMapper implements ResultSetExtractor<List<ProcessInstanc
                         .action(rs.getString("action"))
                         .state(state)
                         .comment(rs.getString("comment"))
-                        .assigner(assigner)
+                        .assigner(assigner.getUuid())
                         .stateSla(sla)
                         .businesssServiceSla(businessServiceSla)
                         .previousStatus(rs.getString("previousStatus"))

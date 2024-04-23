@@ -73,7 +73,7 @@ public class IMRepository {
 
         String tenantId = criteria.getTenantId();
         List<Object> preparedStmtList = new ArrayList<>();
-        String query = queryBuilder.getPGRSearchQuery(criteria, preparedStmtList);
+        String query = queryBuilder.getIMSearchQuery(criteria, preparedStmtList);
         try {
             query = utils.replaceSchemaPlaceholder(query, tenantId);
         } catch (Exception e) {

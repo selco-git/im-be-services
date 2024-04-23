@@ -44,17 +44,15 @@ import java.util.UUID;
 import org.egov.common.utils.MultiStateInstanceUtil;
 import org.egov.im.config.IMConfiguration;
 import org.egov.im.config.SMSService;
+import org.egov.im.entity.Role;
+import org.egov.im.entity.User;
+import org.egov.im.domain.service.UserService;
 import org.egov.im.entity.Event;
 import org.egov.im.entity.ProcessInstance;
 import org.egov.im.entity.Recepient;
-import org.egov.im.entity.Role;
-import org.egov.im.entity.User;
-import org.egov.im.repository.IdGenRepository;
 import org.egov.im.repository.ServiceRequestRepository;
-import org.egov.im.util.IMUtils;
 import org.egov.im.util.NotificationUtil;
-import org.egov.im.util.WorkflowUtil;
-import org.egov.im.web.models.Category;
+import org.egov.im.web.contract.CreateUserRequest;
 import org.egov.im.web.models.IncidentRequest;
 import org.egov.im.web.models.IncidentWrapper;
 import org.egov.im.web.models.RequestInfo;
@@ -62,6 +60,7 @@ import org.egov.im.web.models.RequestInfoWrapper;
 import org.egov.im.web.models.Notification.EventRequest;
 import org.egov.im.web.models.Notification.SMSRequest;
 import org.egov.im.web.models.workflow.ProcessInstanceResponse;
+import org.egov.im.web.models.workflow.ProcessInstanceSearchCriteria;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -99,6 +98,8 @@ public class NotificationService {
     private MultiStateInstanceUtil centralInstanceUtil;
     
     private SMSService smsService;
+
+    private UserService userService;
 
   
 
@@ -541,34 +542,18 @@ public class NotificationService {
      * @return - Returns User object with given UUID
      */
     public User fetchUserByUUID(String uuidstring, RequestInfo requestInfo, String tenantId) {
-        User userInfoCopy = requestInfo.getUserInfo();
+        
+        CreateUserRequest createUserRequest=new CreateUserRequest();
+        createUserRequest.setRequestInfo(requestInfo);  
+        User user=new User();
+        user.setTenantId(tenantId);
+        user.setUuid(uuidstring);
+        user.setType("EMPLOYEE");       
+        user = createUserRequest.toDomain(true);
+        user.setOtpValidationMandatory(false);
+        final User updatedUser = userService.updateWithoutOtpValidation(user, createUserRequest.getRequestInfo());
 
-        User userInfo = getInternalMicroserviceUser(tenantId);
 
-        requestInfo.setUserInfo(userInfo);
-
-        StringBuilder uri = new StringBuilder();
-        uri.append(config.getUserHost()).append(config.getUserSearchEndpoint());
-        Map<String, Object> userSearchRequest = new HashMap<>();
-        userSearchRequest.put("RequestInfo", requestInfo);
-        userSearchRequest.put("tenantId", tenantId);
-        userSearchRequest.put("userType", "EMPLOYEE");
-        Set<String> uuid = new HashSet<>() ;
-        uuid.add(uuidstring);
-        userSearchRequest.put("uuid", uuid);
-        User user = null;
-        try {
-            LinkedHashMap<String, Object> responseMap = (LinkedHashMap<String, Object>) serviceRequestRepository.fetchResult(uri, userSearchRequest);
-            List<LinkedHashMap<String, Object>> users = (List<LinkedHashMap<String, Object>>) responseMap.get("user");
-            String dobFormat = "yyyy-MM-dd";
-            parseResponse(responseMap,dobFormat);
-            user = 	mapper.convertValue(users.get(0), User.class);
-
-        }catch(Exception e) {
-            log.error("Exception while trying parse user object: ",e);
-        }
-
-        requestInfo.setUserInfo(userInfoCopy);
         return user;
     }
 
@@ -610,29 +595,29 @@ public class NotificationService {
         return  returnDate.getTime();
     }
 
-    public ProcessInstance getEmployeeName(String tenantId, String IncidentId, RequestInfo requestInfo,String action){
+    public ProcessInstance getEmployeeName(String tenantId, String incidentId, RequestInfo requestInfo,String action){
         ProcessInstance processInstanceToReturn = new ProcessInstance();
         User userInfoCopy = requestInfo.getUserInfo();
 
         User userInfo = getInternalMicroserviceUser(tenantId);
+        
+        ProcessInstanceSearchCriteria criteria=new ProcessInstanceSearchCriteria();
+
+        criteria.setTenantId(tenantId);
+        List<String> incidentIds = new ArrayList<>();
+        incidentIds.add(incidentId);
+        criteria.setBusinessIds(incidentIds);         
+        RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
+        List<ProcessInstance> processInstances = workflowService.search(requestInfoWrapper.getRequestInfo(),criteria);
+
 
         requestInfo.setUserInfo(userInfo);
 
-        RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
-        StringBuilder URL = workflowService.getprocessInstanceSearchURL(tenantId,IncidentId);
-        URL.append("&").append("history=true");
-
-        Object result = serviceRequestRepository.fetchResult(URL, requestInfoWrapper);
-        ProcessInstanceResponse processInstanceResponse = null;
-        try {
-            processInstanceResponse = mapper.convertValue(result, ProcessInstanceResponse.class);
-        } catch (IllegalArgumentException e) {
-            throw new CustomException("PARSING ERROR", "Failed to parse response of workflow processInstance search");
-        }
-        if (CollectionUtils.isEmpty(processInstanceResponse.getProcessInstances()))
+       
+        if (CollectionUtils.isEmpty(processInstances))
             throw new CustomException("WORKFLOW_NOT_FOUND", "The workflow object is not found");
 
-        for(ProcessInstance processInstance:processInstanceResponse.getProcessInstances()){
+        for(ProcessInstance processInstance:processInstances){
             if(processInstance.getAction().equalsIgnoreCase(action))
                 processInstanceToReturn= processInstance;
         }
@@ -735,7 +720,7 @@ public class NotificationService {
         //Creating userinfo with uuid and role of internal micro service role
         User userInfo = User.builder()
                 .uuid(config.getEgovInternalMicroserviceUserUuid())
-                .emptype("SYSTEM")
+                .type("SYSTEM")
                 .roles(Collections.singletonList(role)).id(0L).build();
 
         return userInfo;

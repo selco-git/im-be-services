@@ -42,7 +42,7 @@ public class IMQueryBuilder {
 
 
 
-    public String getPGRSearchQuery(RequestSearchCriteria criteria, List<Object> preparedStmtList) {
+    public String getIMSearchQuery(RequestSearchCriteria criteria, List<Object> preparedStmtList) {
 
         StringBuilder builder = new StringBuilder(QUERY);
 
@@ -122,7 +122,7 @@ public class IMQueryBuilder {
 
 
     public String getCountQuery(RequestSearchCriteria criteria, List<Object> preparedStmtList){
-        String query = getPGRSearchQuery(criteria, preparedStmtList);
+        String query = getIMSearchQuery(criteria, preparedStmtList);
         String countQuery = COUNT_WRAPPER.replace("{INTERNAL_QUERY}", query);
         return countQuery;
     }

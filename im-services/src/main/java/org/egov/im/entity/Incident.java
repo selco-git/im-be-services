@@ -13,6 +13,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.egov.im.annotation.CharacterConstraint;
+import org.egov.im.entity.User;
 import org.egov.im.web.models.Priority;
 import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.validation.annotation.Validated;

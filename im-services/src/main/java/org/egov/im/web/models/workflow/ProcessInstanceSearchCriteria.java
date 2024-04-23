@@ -1,14 +1,25 @@
 package org.egov.im.web.models.workflow;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
-import javax.validation.constraints.Size;
 import java.util.List;
 
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+
 public class ProcessInstanceSearchCriteria {
 
 	 @JsonProperty("tenantId")

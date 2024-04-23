@@ -9,11 +9,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.egov.im.config.WorkflowConfig;
+import org.egov.im.entity.Role;
 import org.egov.im.entity.Action;
 import org.egov.im.entity.BusinessService;
-import org.egov.im.entity.Role;
 import org.egov.im.entity.State;
-import org.egov.im.entity.User;
+import org.egov.im.entity.Users;
 import org.egov.im.repository.BusinessServiceRepository;
 import org.egov.im.web.models.AuditDetails;
 import org.egov.im.web.models.RequestInfo;
@@ -416,7 +416,7 @@ public class WorkflowUtil {
      * @param user The user whose role tenantIds are to be fetched
      * @return
      */
-    public List<String> getTenantIds(User user){
+    public List<String> getTenantIds(Users user){
         Set<String> tenantIds = new HashSet<>();
         user.getRoles().forEach(role -> {
             tenantIds.add(role.getTenantId());

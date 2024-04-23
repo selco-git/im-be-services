@@ -26,7 +26,7 @@ public class IMService {
 
     private EnrichmentService enrichmentService;
 
-    private UserService userService;
+    private UsersService userService;
 
     private WorkflowService workflowService;
 
@@ -47,7 +47,7 @@ public class IMService {
     private NotificationService notificationService;
 
 
-    public IMService(EnrichmentService enrichmentService, UserService userService, WorkflowService workflowService,
+    public IMService(EnrichmentService enrichmentService, UsersService userService, WorkflowService workflowService,
                       ServiceRequestValidator serviceRequestValidator, ServiceRequestValidator validator, Producer producer,
                       IMConfiguration config, IMRepository repository,IncidentService incidentService,NotificationService notificationService) {
         this.enrichmentService = enrichmentService;
@@ -103,18 +103,18 @@ public class IMService {
             return new ArrayList<>();;
 
          //to add later
-        //userService.enrichUsers(serviceWrappers);
-        List<IncidentWrapper> enrichedServiceWrappers = workflowService.enrichWorkflow(requestInfo,incidentWrappers);
+        userService.enrichUsers(incidentWrappers);
+        List<IncidentWrapper> enrichedServiceWrappers = workflowService.enrichWorkflow(requestInfo,incidentWrappers,criteria.getTenantId());
         Map<Long, List<IncidentWrapper>> sortedWrappers = new TreeMap<>(Collections.reverseOrder());
-//        for(IncidentWrapper svc : enrichedServiceWrappers){
-//            if(sortedWrappers.containsKey(svc.getIncident().getAuditDetails().getCreatedTime())){
-//                sortedWrappers.get(svc.getIncident().getAuditDetails().getCreatedTime()).add(svc);
-//            }else{
-//                List<IncidentWrapper> incidentWrapperList = new ArrayList<>();
-//                incidentWrapperList.add(svc);
-//                sortedWrappers.put(svc.getIncident().getAuditDetails().getCreatedTime(), incidentWrapperList);
-//            }
-//        }
+        for(IncidentWrapper svc : enrichedServiceWrappers){
+            if(sortedWrappers.containsKey(svc.getIncident().getCreatedTime())){
+                sortedWrappers.get(svc.getIncident().getCreatedTime()).add(svc);
+            }else{
+                List<IncidentWrapper> incidentWrapperList = new ArrayList<>();
+                incidentWrapperList.add(svc);
+                sortedWrappers.put(svc.getIncident().getCreatedTime(), incidentWrapperList);
+            }
+        }
         List<IncidentWrapper> sortedServiceWrappers = new ArrayList<>();
         for(Long createdTimeDesc : sortedWrappers.keySet()){
             sortedServiceWrappers.addAll(sortedWrappers.get(createdTimeDesc));
@@ -171,7 +171,7 @@ public class IMService {
         }
 
         userService.enrichUsers(incidentWrappers);
-        List<IncidentWrapper> enrichedServiceWrappers = workflowService.enrichWorkflow(requestInfo, incidentWrappers);
+        List<IncidentWrapper> enrichedServiceWrappers = workflowService.enrichWorkflow(requestInfo, incidentWrappers,criteria.getTenantId());
 
         Map<Long, List<IncidentWrapper>> sortedWrappers = new TreeMap<>(Collections.reverseOrder());
 //        for(IncidentWrapper svc : enrichedServiceWrappers){

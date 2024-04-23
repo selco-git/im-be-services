@@ -37,13 +37,7 @@ public class WorkflowConfig {
         TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
     }
 
-    @Bean
-    @Autowired
-    public MappingJackson2HttpMessageConverter jacksonConverter(ObjectMapper objectMapper) {
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(objectMapper);
-        return converter;
-    }
+  
 
     @Value("${persister.save.transition.wf.topic}")
     private String saveTransitionTopic;
@@ -62,14 +56,6 @@ public class WorkflowConfig {
 
     @Value("${egov.mdms.search.endpoint}")
     private String mdmsEndPoint;
-
-
-    //User
-    @Value("${egov.user.host}")
-    private String userHost;
-
-    @Value("${egov.user.search.endpoint}")
-    private String userSearchEndpoint;
 
     @Value("${egov.wf.inbox.assignedonly}")
     private Boolean assignedOnly;

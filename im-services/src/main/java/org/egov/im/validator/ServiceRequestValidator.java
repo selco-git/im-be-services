@@ -1,7 +1,6 @@
 package org.egov.im.validator;
 
 import static org.egov.im.util.IMConstants.PGR_WF_REOPEN;
-import static org.egov.im.util.IMConstants.USERTYPE_CITIZEN;
 import static org.egov.im.util.IMConstants.USERTYPE_EMPLOYEE;
 
 import java.util.Arrays;
@@ -11,13 +10,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.im.config.IMConfiguration;
+import org.egov.im.entity.User;
+import org.egov.im.domain.model.enums.UserType;
 import org.egov.im.entity.Incident;
 import org.egov.im.repository.IMRepository;
 import org.egov.im.web.models.IncidentRequest;
 import org.egov.im.web.models.IncidentWrapper;
 import org.egov.im.web.models.RequestInfo;
 import org.egov.im.web.models.RequestSearchCriteria;
-import org.egov.im.entity.User;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -85,7 +85,7 @@ public class ServiceRequestValidator {
 
         RequestInfo requestInfo = request.getRequestInfo();
 
-        if(requestInfo.getUserInfo().getEmptype().equalsIgnoreCase(USERTYPE_EMPLOYEE)){
+        if(requestInfo.getUserInfo().getType().toString().equalsIgnoreCase(UserType.EMPLOYEE.toString())){
             User citizen = request.getIncident().getReporterr();
             if(citizen == null)
                 errorMap.put("INVALID_REQUEST","Citizen object cannot be null");
@@ -112,7 +112,7 @@ public class ServiceRequestValidator {
         RequestInfo requestInfo = request.getRequestInfo();
         Long lastModifiedTime = incident.getLastModifiedTime();
 
-        if(requestInfo.getUserInfo().getEmptype().equalsIgnoreCase(USERTYPE_CITIZEN)){
+        if(requestInfo.getUserInfo().getType().equalsIgnoreCase(USERTYPE_EMPLOYEE)){
             if(!requestInfo.getUserInfo().getUuid().equalsIgnoreCase(incident.getAccountId()))
                 throw new CustomException("INVALID_ACTION","Not authorized to re-open the complain");
         }
@@ -150,20 +150,20 @@ public class ServiceRequestValidator {
      */
     private void validateSearchParam(RequestInfo requestInfo, RequestSearchCriteria criteria){
 
-        if(requestInfo.getUserInfo().getEmptype().equalsIgnoreCase("EMPLOYEE" ) && criteria.isEmpty())
+        if(requestInfo.getUserInfo().getType().equalsIgnoreCase("EMPLOYEE" ) && criteria.isEmpty())
             throw new CustomException("INVALID_SEARCH","Search without params is not allowed");
 
-        if(requestInfo.getUserInfo().getEmptype().equalsIgnoreCase("EMPLOYEE") && criteria.getTenantId().split("\\.").length == config.getStateLevelTenantIdLength()){
+        if(requestInfo.getUserInfo().getType().equalsIgnoreCase("EMPLOYEE") && criteria.getTenantId().split("\\.").length == config.getStateLevelTenantIdLength()){
             throw new CustomException("INVALID_SEARCH", "Employees cannot perform state level searches.");
         }
 
         String allowedParamStr = null;
 
-        if(requestInfo.getUserInfo().getEmptype().equalsIgnoreCase("CITIZEN" ))
+        if(requestInfo.getUserInfo().getType().equalsIgnoreCase("CITIZEN" ))
             allowedParamStr = config.getAllowedCitizenSearchParameters();
-        else if(requestInfo.getUserInfo().getEmptype().equalsIgnoreCase("EMPLOYEE" ) || requestInfo.getUserInfo().getEmptype().equalsIgnoreCase("SYSTEM") )
+        else if(requestInfo.getUserInfo().getType().equalsIgnoreCase("EMPLOYEE" ) || requestInfo.getUserInfo().getType().equalsIgnoreCase("SYSTEM") )
             allowedParamStr = config.getAllowedEmployeeSearchParameters();
-        else throw new CustomException("INVALID SEARCH","The userType: "+requestInfo.getUserInfo().getEmptype()+
+        else throw new CustomException("INVALID SEARCH","The userType: "+requestInfo.getUserInfo().getType()+
                     " does not have any search config");
 
         List<String> allowedParams = Arrays.asList(allowedParamStr.split(","));

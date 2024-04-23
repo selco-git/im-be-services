@@ -7,7 +7,7 @@ import javax.validation.Valid;
 
 import org.egov.im.entity.BusinessService;
 import org.egov.im.service.BusinessMasterService;
-import org.egov.im.util.ResponseInfoFactory;
+import org.egov.im.web.contract.factory.ResponseInfoFactory;
 import org.egov.im.web.models.RequestInfoWrapper;
 import org.egov.im.web.models.workflow.BusinessServiceRequest;
 import org.egov.im.web.models.workflow.BusinessServiceResponse;
