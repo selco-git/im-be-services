@@ -8,7 +8,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.im.service.IMService;
-import org.egov.im.util.ResponseInfoFactory;
+import org.egov.im.web.contract.factory.ResponseInfoFactory;
 import org.egov.im.web.models.CountResponse;
 import org.egov.im.web.models.IncidentRequest;
 import org.egov.im.web.models.IncidentResponse;

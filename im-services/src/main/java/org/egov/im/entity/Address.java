@@ -1,109 +1,108 @@
 package org.egov.im.entity;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import org.egov.im.annotation.CharacterConstraint;
-import org.egov.im.web.models.AuditDetails;
-import org.hibernate.validator.constraints.SafeHtml;
-import org.springframework.validation.annotation.Validated;
+import org.apache.commons.lang3.StringUtils;
+import org.egov.im.domain.model.enums.AddressType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Representation of a address. Indiavidual APIs may choose to extend from this using allOf if more details needed to be added in their case. 
- */
-@ApiModel(description = "Representation of a address. Indiavidual APIs may choose to extend from this using allOf if more details needed to be added in their case. ")
-@Validated
-@javax.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2020-07-15T11:35:33.568+05:30")
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class Address   {
+@Entity
+@Table(name="eg_user_address")
+@EqualsAndHashCode(of = {"id"})
+public class Address {
 	
+	@JsonProperty("pinCode")
+	@Column(name="pincode")
+    private String pinCode;
 	
-	  	@SafeHtml
-      	@JsonProperty("id")
-	  	@Id
-      	@Column(name="id")
-	  	private String id = null;
-	
-      
-        @SafeHtml
-        @JsonProperty("doorNo")
-        @Column(name="doorNo")
-        private String doorNo = null;
+	@JsonProperty("city")
+	@Column(name="city")
+    private String city;
+    
+    
+    @JsonProperty("address")
+    @Column(name="address")
+    private String address;
+    
+    @JsonProperty("version")
+    @Column(name="version")
+    private String version;
+    
+    @JsonProperty("type")
+    @Column(name="type")
+    private AddressType type;
+    
+    @JsonProperty("id")
+    @Id
+    @Column(name="id")
+    private Long id;
+    
+    @JsonProperty("tenantId")
+    @Column(name="tenantid")
+    private String tenantId;
+    
+    @JsonProperty("userid")
+    @Column(name="userid")
+    private Long userid;
+    
+    @Transient
+    private String userId;
+    
+   @Transient
+    private String addressType;
+   
+    @JsonProperty("lastmodifiedby")
+    @Column(name="lastmodifiedby")
+    private Long LastModifiedBy;
+    
+    @JsonProperty("lastmodifieddate")
+    @Column(name="lastmodifieddate")
+    private Date LastModifiedDate;
 
-        @SafeHtml
-        @JsonProperty("plotNo")
-        @Column(name="plotNo")
-        private String plotNo = null;
-        
-        @SafeHtml
-        @JsonProperty("tenantId")
-        @Column(name="tenantId")
-        private String tenantId = null;
+    boolean isInvalid() {
+        return isPinCodeInvalid()
+                || isCityInvalid()
+                || isAddressInvalid();
+    }
 
-        @SafeHtml
-        @JsonProperty("buildingName")
-        @Column(name="buildingName")
-        private String buildingName = null;
+    boolean isNotEmpty() {
+        return StringUtils.isNotEmpty(pinCode)
+                || StringUtils.isNotEmpty(city)
+                || StringUtils.isNotEmpty(address);
+    }
 
-        @SafeHtml
-        @JsonProperty("street")
-        @Column(name="street")
-        private String street = null;
+    boolean isPinCodeInvalid() {
+        return pinCode != null && pinCode.length() > 10;
+    }
 
-     
+    boolean isCityInvalid() {
+        return city != null && city.length() > 300;
+    }
 
-        @SafeHtml
-        @JsonProperty("landmark")
-        @Column(name="landmark")
-        private String landmark = null;
-
-        @SafeHtml
-        @JsonProperty("city")
-        @Column(name="city")
-        private String city = null;
-
-        @SafeHtml
-        @JsonProperty("district")
-        @Column(name="district")
-        private String district = null;
-
-        @SafeHtml
-        @JsonProperty("region")
-        @Column(name="region")
-        private String region = null;
-
-        @SafeHtml
-        @JsonProperty("state")
-        @Column(name="state")
-        private String state = null;
-
-        @SafeHtml
-        @JsonProperty("country")
-        @Column(name="country")
-        private String country = null;
-
-        @SafeHtml
-        @JsonProperty("pincode")
-        @Column(name="pincode")
-        private String pincode = null;
-
-       
-
+    boolean isAddressInvalid() {
+        return address != null && address.length() > 300;
+    }
 }

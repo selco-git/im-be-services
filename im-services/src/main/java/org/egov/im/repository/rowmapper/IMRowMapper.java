@@ -62,6 +62,7 @@ public class IMRowMapper implements ResultSetExtractor<List<Incident>> {
                 String urgency = rs.getString("ser_urgency");
                 String affectedServices = rs.getString("ser_affectedservices");
                 Integer rating = rs.getInt("ser_rating");
+                String accountid=rs.getString("ser_accountid");
                 if(rs.wasNull()){rating = null;}
 
                 AuditDetails auditDetails = AuditDetails.builder().createdBy(createdby).createdTime(createdtime)
@@ -80,6 +81,7 @@ public class IMRowMapper implements ResultSetExtractor<List<Incident>> {
                         .priority(Priority.fromValue(priority))
                         .impact(impact)
                         .urgency(urgency)
+                        .accountId(accountid)
                         .affectedServices(affectedServices)
                         .createdBy(auditDetails.getCreatedBy())
                         .createdTime(auditDetails.getCreatedTime())
@@ -100,36 +102,7 @@ public class IMRowMapper implements ResultSetExtractor<List<Incident>> {
 
     }
 
-    private void addChildrenToProperty(ResultSet rs, Incident incident) throws SQLException {
-
-
-            Double latitude =  rs.getDouble("latitude");
-            Double longitude = rs.getDouble("longitude");
-            Boundary locality = Boundary.builder().code(rs.getString("locality")).build();
-
-            GeoLocation geoLocation = GeoLocation.builder().latitude(latitude).longitude(longitude).build();
-
-            Address address = Address.builder()
-                    .tenantId(rs.getString("ads_tenantId"))
-                    .id(rs.getString("ads_id"))
-                    .plotNo(rs.getString("plotNo"))
-                    .doorNo(rs.getString("doorno"))
-                    .buildingName(rs.getString("buildingName"))
-                    .street(rs.getString("street"))
-                    .landmark(rs.getString("landmark"))
-                    .city(rs.getString("city"))
-                    .district(rs.getString("district"))
-                    .region(rs.getString("region"))
-                    .state(rs.getString("state"))
-                    .country(rs.getString("country"))
-                    .pincode(rs.getString("pincode"))
-                    .build();
-
-            JsonNode additionalDetails = getAdditionalDetail("ads_additionaldetails",rs);
-
-
-
-        }
+   
 
 
     private JsonNode getAdditionalDetail(String columnName, ResultSet rs){

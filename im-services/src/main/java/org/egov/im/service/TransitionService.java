@@ -76,8 +76,7 @@ public class TransitionService {
                // currentState = processStateAndAction.getProcessInstanceFromDb().getState();
                 
                 for(State state : businessService.getStates()){
-                    if(state.getState()!=null && state.getState().equalsIgnoreCase(processStateAndAction.getProcessInstanceFromDb().getState().getUuid())){
-                        
+                    if(state.getUuid().equalsIgnoreCase(processStateAndAction.getProcessInstanceFromDb().getState().getUuid())){
                     	currentState=state;
                         break;
                     }

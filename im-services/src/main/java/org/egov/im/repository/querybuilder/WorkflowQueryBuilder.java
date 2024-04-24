@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.egov.common.contract.request.RequestInfo;
 import org.egov.im.config.WorkflowConfig;
+import org.egov.im.web.models.RequestInfo;
 import org.egov.im.web.models.workflow.ProcessInstanceSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

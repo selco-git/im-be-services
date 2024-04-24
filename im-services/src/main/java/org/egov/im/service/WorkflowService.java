@@ -12,11 +12,12 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.im.config.IMConfiguration;
 import org.egov.im.config.WorkflowConfig;
+import org.egov.im.entity.User;
 import org.egov.im.entity.BusinessService;
 import org.egov.im.entity.Incident;
 import org.egov.im.entity.ProcessInstance;
 import org.egov.im.entity.State;
-import org.egov.im.entity.User;
+import org.egov.im.entity.Users;
 import org.egov.im.repository.BusinessServiceRepository;
 import org.egov.im.repository.ServiceRequestRepository;
 import org.egov.im.repository.WorKflowRepository;
@@ -49,6 +50,7 @@ public class WorkflowService {
     private TransitionService transitionService;
 
     private EnrichmentService enrichmentService;
+  
 
     private WorkflowValidator workflowValidator;
 
@@ -245,23 +247,7 @@ public class WorkflowService {
 
    }
 
-   /**
-    * Creates url for search based on given tenantId and businessservices
-    *
-    * @param tenantId        The tenantId for which url is generated
-    * @param businessService The businessService for which url is generated
-    * @return The search url
-    */
-   private StringBuilder getSearchURLWithParams(String tenantId, String businessService) {
 
-       StringBuilder url = new StringBuilder(imConfiguration.getWfHost());
-       url.append(imConfiguration.getWfBusinessServiceSearchPath());
-       url.append("?tenantId=");
-       url.append(tenantId);
-       url.append("&businessServices=");
-       url.append(businessService);
-       return url;
-   }
 
 
    public void enrichmentForSendBackToCititzen() {
@@ -272,40 +258,28 @@ public class WorkflowService {
    }
 
 
-   public List<IncidentWrapper> enrichWorkflow(RequestInfo requestInfo, List<IncidentWrapper> incidentWrappers) {
+   public List<IncidentWrapper> enrichWorkflow(RequestInfo requestInfo, List<IncidentWrapper> incidentWrappers, String tenantId) {
 
-       Map<String, List<IncidentWrapper>> tenantIdToServiceWrapperMap = getTenantIdToServiceWrapperMap(incidentWrappers);
-
+       Map<String, List<IncidentWrapper>> tenantIdToServiceWrapperMap = getTenantIdToServiceWrapperMap(incidentWrappers,tenantId);
+       ProcessInstanceSearchCriteria criteria=new ProcessInstanceSearchCriteria();
        List<IncidentWrapper> enrichedServiceWrappers = new ArrayList<>();
 
-       for(String tenantId : tenantIdToServiceWrapperMap.keySet()) {
+       for(String tenantid : tenantIdToServiceWrapperMap.keySet()) {
 
-           List<String> serviceRequestIds = new ArrayList<>();
+           List<String> incidentIds = new ArrayList<>();
 
-           List<IncidentWrapper> tenantSpecificWrappers = tenantIdToServiceWrapperMap.get(tenantId);
+           List<IncidentWrapper> tenantSpecificWrappers = tenantIdToServiceWrapperMap.get(tenantid);
 
-           tenantSpecificWrappers.forEach(pgrEntity -> {
-               serviceRequestIds.add(pgrEntity.getIncident().getIncidentId());
+           tenantSpecificWrappers.forEach(imEntity -> {
+               incidentIds.add(imEntity.getIncident().getIncidentId());
            });
 
+           criteria.setTenantId(tenantId);
+           criteria.setBusinessIds(incidentIds);         
            RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
+           List<ProcessInstance> processInstances = search(requestInfoWrapper.getRequestInfo(),criteria);
 
-           StringBuilder searchUrl = getprocessInstanceSearchURL(tenantId, StringUtils.join(serviceRequestIds, ','));
-           Object result = repository.fetchResult(searchUrl, requestInfoWrapper);
-
-
-           ProcessInstanceResponse processInstanceResponse = null;
-           try {
-               processInstanceResponse = mapper.convertValue(result, ProcessInstanceResponse.class);
-           } catch (IllegalArgumentException e) {
-               throw new CustomException("PARSING ERROR", "Failed to parse response of workflow processInstance search");
-           }
-
-           if (CollectionUtils.isEmpty(processInstanceResponse.getProcessInstances()) || processInstanceResponse.getProcessInstances().size() != serviceRequestIds.size())
-               throw new CustomException("WORKFLOW_NOT_FOUND", "The workflow object is not found");
-
-           Map<String, Workflow> businessIdToWorkflow = getWorkflow(processInstanceResponse.getProcessInstances());
-
+           Map<String, Workflow> businessIdToWorkflow = getWorkflow(processInstances);
            tenantSpecificWrappers.forEach(pgrEntity -> {
                pgrEntity.setWorkflow(businessIdToWorkflow.get(pgrEntity.getIncident().getIncidentId()));
            });
@@ -317,7 +291,7 @@ public class WorkflowService {
 
    }
 
-   private Map<String, List<IncidentWrapper>> getTenantIdToServiceWrapperMap(List<IncidentWrapper> incidentWrappers) {
+   private Map<String, List<IncidentWrapper>> getTenantIdToServiceWrapperMap(List<IncidentWrapper> incidentWrappers,String tenantId) {
        Map<String, List<IncidentWrapper>> resultMap = new HashMap<>();
        for(IncidentWrapper incidentWrapper : incidentWrappers){
            if(resultMap.containsKey(incidentWrapper.getIncident().getTenantId())){
@@ -325,7 +299,7 @@ public class WorkflowService {
            }else{
                List<IncidentWrapper> incidentWrapperList = new ArrayList<>();
                incidentWrapperList.add(incidentWrapper);
-               resultMap.put(incidentWrapper.getIncident().getTenantId(), incidentWrapperList);
+               resultMap.put(incidentWrapper.getIncident().getTenantId()==null?tenantId:incidentWrapper.getIncident().getTenantId(), incidentWrapperList);
            }
        }
        return resultMap;
@@ -409,15 +383,5 @@ private ProcessInstance getProcessInstanceForIM(IncidentRequest request) {
    }
 
 
-   public StringBuilder getprocessInstanceSearchURL(String tenantId, String IncidentId) {
-
-       StringBuilder url = new StringBuilder(imConfiguration.getWfHost());
-       url.append(imConfiguration.getWfProcessInstanceSearchPath());
-       url.append("?tenantId=");
-       url.append(tenantId);
-       url.append("&businessIds=");
-       url.append(IncidentId);
-       return url;
-
-   }
+   
 }

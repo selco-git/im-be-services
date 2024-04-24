@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.egov.im.entity.Role;
+import org.egov.im.entity.User;
 import org.egov.im.entity.Action;
 import org.egov.im.entity.BusinessService;
 import org.egov.im.entity.ProcessInstance;
-import org.egov.im.entity.Role;
 import org.egov.im.entity.State;
-import org.egov.im.entity.User;
+import org.egov.im.entity.Users;
 import org.egov.im.util.BusinessUtil;
 import org.egov.im.util.WorkflowUtil;
 import org.egov.im.web.models.RequestInfo;
@@ -184,7 +185,7 @@ public class WorkflowValidator {
             *  Validates if the application is sendback to citizen, only the citizen to whom the
             *  application is sent back is able to take the action
             * */
-            if(requestInfo.getUserInfo().getEmptype().equalsIgnoreCase(CITIZEN_TYPE)){
+            if(requestInfo.getUserInfo().getType().equalsIgnoreCase(CITIZEN_TYPE)){
                 ProcessInstance processInstanceFromDB = processStateAndAction.getProcessInstanceFromDb();
                 if(processInstanceFromDB!=null && processInstanceFromDB.getAction().equalsIgnoreCase(SENDBACKTOCITIZEN)){
                     List<String> assignes = processInstanceFromDB.getAssignes().stream().map(User::getUuid).collect(Collectors.toList());
@@ -217,7 +218,7 @@ public class WorkflowValidator {
      */
     private void validateAssignes(RequestInfo requestInfo, List<ProcessStateAndAction> processStateAndActions){
 
-        if(requestInfo.getUserInfo().getEmptype().equalsIgnoreCase(CITIZEN_TYPE)){
+        if(requestInfo.getUserInfo().getType().equalsIgnoreCase(CITIZEN_TYPE)){
 
             String userUUID = requestInfo.getUserInfo().getUuid();
             Map<String, String> errorMap = new HashMap<>();
@@ -233,7 +234,7 @@ public class WorkflowValidator {
 
                         for(User assignee : processInstanceFromDb.getAssignes()){
 
-                            if(assignee.getEmptype().equalsIgnoreCase(CITIZEN_TYPE))
+                            if(assignee.getType().equalsIgnoreCase(CITIZEN_TYPE))
                                 assignes.add(assignee.getUuid());
 
                         }

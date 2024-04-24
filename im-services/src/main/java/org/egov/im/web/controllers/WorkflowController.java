@@ -8,7 +8,7 @@ import javax.validation.Valid;
 
 import org.egov.im.entity.ProcessInstance;
 import org.egov.im.service.WorkflowService;
-import org.egov.im.util.ResponseInfoFactory;
+import org.egov.im.web.contract.factory.ResponseInfoFactory;
 import org.egov.im.web.models.RequestInfoWrapper;
 import org.egov.im.web.models.workflow.ProcessInstanceRequest;
 import org.egov.im.web.models.workflow.ProcessInstanceResponse;

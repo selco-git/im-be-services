@@ -2,16 +2,17 @@ package org.egov.im.util;
 
 import static org.egov.im.util.IMConstants.NOTIFICATION_LOCALE;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.utils.MultiStateInstanceUtil;
 import org.egov.im.config.IMConfiguration;
 import org.egov.im.producer.Producer;
 import org.egov.im.repository.ServiceRequestRepository;
+import org.egov.im.service.EventService;
 import org.egov.im.web.models.RequestInfo;
 import org.egov.im.web.models.Notification.EventRequest;
 import org.egov.im.web.models.Notification.SMSRequest;
@@ -20,8 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-
-import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,6 +42,11 @@ public class NotificationUtil {
 
     @Autowired
     private MultiStateInstanceUtil centralInstanceUtil;
+    
+    @Autowired
+    private EventService eventService;
+    
+ 
 
 
     /**
@@ -91,22 +95,12 @@ public class NotificationUtil {
      * @param localizationMessage Localisation Message
      * @return Return Customized Message based on localisation code
      */
-    public String getCustomizedMsg(String action, String applicationStatus, String roles, String localizationMessage) {
-        StringBuilder notificationCode = new StringBuilder();
+    public String getCustomizedMsg(String action, String applicationStatus, String roles, Map<String,String> localizationMessage) {
+        String notificationCode = "";
+        notificationCode=notificationCode.concat("IM_").concat(roles.toUpperCase()).concat("_").concat(action.toUpperCase()).concat("_").concat(applicationStatus.toUpperCase()).concat("_SMS_MESSAGE");
 
-        notificationCode.append("PGR_").append(roles.toUpperCase()).append("_").append(action.toUpperCase()).append("_").append(applicationStatus.toUpperCase()).append("_SMS_MESSAGE");
-
-        String path = "$..messages[?(@.code==\"{}\")].message";
-        path = path.replace("{}", notificationCode);
-        String message = null;
-        try {
-            ArrayList<String> messageObj = JsonPath.parse(localizationMessage).read(path);
-            if(messageObj != null && messageObj.size() > 0) {
-                message = messageObj.get(0);
-            }
-        } catch (Exception e) {
-            log.warn("Fetching from localization failed", e);
-        }
+        
+        String message = localizationMessage.get(notificationCode);
 
         return message;
     }
@@ -117,22 +111,11 @@ public class NotificationUtil {
      * @param localizationMessage Localisation Message
      * @return Return localisation message based on default code
      */
-    public String getDefaultMsg(String roles, String localizationMessage) {
-        StringBuilder notificationCode = new StringBuilder();
+    public String getDefaultMsg(String roles, Map<String,String> localizationMessage) {
+    	 String notificationCode = "";
+         notificationCode=notificationCode.concat("IM_").concat("DEFAULT_").concat(roles.toUpperCase()).concat("_SMS_MESSAGE");
 
-        notificationCode.append("PGR_").append("DEFAULT_").append(roles.toUpperCase()).append("_SMS_MESSAGE");
-
-        String path = "$..messages[?(@.code==\"{}\")].message";
-        path = path.replace("{}", notificationCode);
-        String message = null;
-        try {
-            ArrayList<String> messageObj = JsonPath.parse(localizationMessage).read(path);
-            if(messageObj != null && messageObj.size() > 0) {
-                message = messageObj.get(0);
-            }
-        } catch (Exception e) {
-            log.warn("Fetching from localization failed", e);
-        }
+        String message = localizationMessage.get(notificationCode);
 
         return message;
     }
@@ -148,7 +131,7 @@ public class NotificationUtil {
                 return;
             }
             for (SMSRequest smsRequest : smsRequestList) {
-                producer.push(config.getSmsNotifTopic(), smsRequest);
+            	//smsNotificationListener.process(smsRequest);
                 log.info("Messages: " + smsRequest.getMessage());
             }
         }
@@ -160,7 +143,7 @@ public class NotificationUtil {
      * @param request EventRequest Object
      */
     public void sendEventNotification(String tenantId, EventRequest request) {
-        producer.push(config.getSaveUserEventsTopic(), request);
+        eventService.save(request.getEvents().get(0));
     }
 
     /**
@@ -188,18 +171,9 @@ public class NotificationUtil {
      * @param notificationCode Notification Code
      * @return Return Customized Message
      */
-    public String getCustomizedMsgForPlaceholder(String localizationMessage,String notificationCode) {
-        String path = "$..messages[?(@.code==\"{}\")].message";
-        path = path.replace("{}", notificationCode);
-        String message = null;
-        try {
-            ArrayList<String> messageObj = (ArrayList<String>) JsonPath.parse(localizationMessage).read(path);
-            if(messageObj != null && messageObj.size() > 0) {
-                message = messageObj.get(0);
-            }
-        } catch (Exception e) {
-            log.warn("Fetching from localization for placeholder failed", e);
-        }
+    public String getCustomizedMsgForPlaceholder(Map<String,String> localizationMessage,String notificationCode) {
+       
+        String message = localizationMessage.get(notificationCode);
         return message;
     }
 

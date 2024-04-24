@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.im.entity.Document;
+import org.egov.im.entity.User;
 import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.validation.annotation.Validated;
 

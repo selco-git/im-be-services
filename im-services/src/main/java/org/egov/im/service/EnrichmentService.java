@@ -13,13 +13,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.egov.im.config.IMConfiguration;
+import org.egov.im.entity.Role;
+import org.egov.im.entity.User;
 import org.egov.im.entity.Action;
 import org.egov.im.entity.BusinessService;
 import org.egov.im.entity.Incident;
 import org.egov.im.entity.ProcessInstance;
-import org.egov.im.entity.Role;
 import org.egov.im.entity.State;
-import org.egov.im.entity.User;
+import org.egov.im.entity.Users;
 import org.egov.im.repository.IdGenRepository;
 import org.egov.im.util.IMUtils;
 import org.egov.im.util.WorkflowUtil;
@@ -51,7 +52,7 @@ public class EnrichmentService {
 
     private IMConfiguration config;
 
-    private UserService userService;
+    private UsersService userService;
 
     private WorkflowUtil util;
 
@@ -62,7 +63,7 @@ public class EnrichmentService {
     
     @Autowired
     public EnrichmentService(IMUtils utils, IdGenRepository idGenRepository, IMConfiguration config, 
-    		UserService userService,WorkflowUtil util,TransitionService transitionService) {
+    		UsersService userService,WorkflowUtil util,TransitionService transitionService) {
         this.utils = utils;
         this.idGenRepository = idGenRepository;
         this.config = config;
@@ -81,8 +82,7 @@ public class EnrichmentService {
         RequestInfo requestInfo = incidentRequest.getRequestInfo();
         Incident incident = incidentRequest.getIncident();
         Workflow workflow = incidentRequest.getWorkflow();
-        //String tenantId = incident.getTenantId();
-
+        if(requestInfo.getUserInfo().getType().equalsIgnoreCase(USERTYPE_CITIZEN))
         incidentRequest.getIncident().setAccountId(requestInfo.getUserInfo().getUuid());
 
         userService.callUserService(incidentRequest);
@@ -136,8 +136,8 @@ public class EnrichmentService {
      */
     public void enrichSearchRequest(RequestInfo requestInfo, RequestSearchCriteria criteria){
 
-        if(criteria.isEmpty() && requestInfo.getUserInfo().getEmptype().equalsIgnoreCase(USERTYPE_CITIZEN)){
-            String citizenMobileNumber = requestInfo.getUserInfo().getUserName();
+        if(criteria.isEmpty() && requestInfo.getUserInfo().getType().equalsIgnoreCase(USERTYPE_CITIZEN)){
+            String citizenMobileNumber = requestInfo.getUserInfo().getUsername();
             criteria.setMobileNumber(citizenMobileNumber);
         }
 
@@ -327,7 +327,7 @@ public class EnrichmentService {
             processStateAndAction.getProcessInstanceFromRequest().setCreatedTime(auditDetails.getCreatedTime());
             processStateAndAction.getProcessInstanceFromRequest().setLastModifiedBy(auditDetails.getLastModifiedBy());
             processStateAndAction.getProcessInstanceFromRequest().setLastModifiedTime(auditDetails.getLastModifiedTime());
-            processStateAndAction.getProcessInstanceFromRequest().setAssigner(requestInfo.getUserInfo());
+            processStateAndAction.getProcessInstanceFromRequest().setAssigner(requestInfo.getUserInfo().getUuid());
             if(!CollectionUtils.isEmpty(processStateAndAction.getProcessInstanceFromRequest().getDocuments())){
                 processStateAndAction.getProcessInstanceFromRequest().getDocuments().forEach(document -> {
                     document.setAuditDetails(auditDetails);
@@ -402,7 +402,7 @@ public class EnrichmentService {
 
             if(!CollectionUtils.isEmpty(processStateAndAction.getProcessInstanceFromRequest().getAssignes()))
                 uuids.addAll(processStateAndAction.getProcessInstanceFromRequest().getAssignes().stream().map(User::getUuid).collect(Collectors.toSet()));
-            uuids.add(processStateAndAction.getProcessInstanceFromRequest().getAssigner().getUuid());
+            uuids.add(processStateAndAction.getProcessInstanceFromRequest().getAssigner());
 
             if(processStateAndAction.getProcessInstanceFromDb() != null){
                 if(!CollectionUtils.isEmpty(processStateAndAction.getProcessInstanceFromDb().getAssignes())){
@@ -413,7 +413,8 @@ public class EnrichmentService {
         });
 
 
-        Map<String,User> idToUserMap = userService.searchUser(requestInfo,uuids);
+        Map<String,User> idToUserMap =userService.enrichUserss(uuids);
+
         Map<String,String> errorMap = new HashMap<>();
         processStateAndActions.forEach(processStateAndAction -> {
 
@@ -458,11 +459,11 @@ public class EnrichmentService {
      * @param idToUserMap Search response as a map of UUID to user
      */
     private void enrichAssigner(ProcessInstance processInstance, Map<String,User> idToUserMap, Map<String , String> errorMap){
-        User assigner = idToUserMap.get(processInstance.getAssigner().getUuid());
+        User assigner = idToUserMap.get(processInstance.getAssigner());
         if(assigner==null)
-            errorMap.put("INVALID UUID","User not found for uuid: "+processInstance.getAssigner().getUuid());
-        processInstance.setAssigner(assigner);
-    }
+            errorMap.put("INVALID UUID","User not found for uuid: "+processInstance.getAssigner());
+        processInstance.setAssigner(assigner.getUuid());
+        }
     
     /**
      * Enriches processInstanceFromRequest from the search response
@@ -475,7 +476,7 @@ public class EnrichmentService {
             if(!CollectionUtils.isEmpty(processInstance.getAssignes()))
                 uuids.addAll(processInstance.getAssignes().stream().map(User::getUuid).collect(Collectors.toList()));
 
-            uuids.add(processInstance.getAssigner().getUuid());
+            uuids.add(processInstance.getAssigner());
         });
         Map<String,User> idToUserMap = userService.searchUser(requestInfo,uuids);
         Map<String,String> errorMap = new HashMap<>();

@@ -2,8 +2,8 @@ package org.egov.im.web.models.user;
 
 import java.util.List;
 
-import org.egov.common.contract.response.ResponseInfo;
 import org.egov.im.entity.User;
+import org.egov.im.web.models.ResponseInfo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.egov.common.contract.request.RequestInfo;
 import org.egov.im.entity.ProcessInstance;
 import org.egov.im.repository.querybuilder.WorkflowQueryBuilder;
 import org.egov.im.repository.rowmapper.WorkflowRowMapper;
+import org.egov.im.web.models.RequestInfo;
 import org.egov.im.web.models.workflow.ProcessInstanceSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

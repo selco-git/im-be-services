@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import javax.sql.DataSource;
 
 import org.egov.im.config.PropertiesManager;
-import org.egov.im.util.ResponseInfoFactory;
+import org.egov.im.web.contract.factory.ResponseInfoFactory;
 import org.egov.im.web.models.RequestInfo;
 import org.egov.im.web.models.Idgen.IdGenerationRequest;
 import org.egov.im.web.models.Idgen.IdGenerationResponse;

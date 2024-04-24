@@ -1,6 +1,7 @@
 package org.egov.im.web.models.workflow;
 
-import org.egov.common.contract.request.RequestInfo;
+
+import org.egov.im.web.models.RequestInfo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

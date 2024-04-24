@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.egov.im.entity.User;
 import org.egov.im.web.models.AuditDetails;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -104,12 +106,15 @@ public class ProcessInstance   {
         private List<Document> documents = null;
 
         @JsonProperty("assigner")
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "assigner",  referencedColumnName = "uuid",nullable = false)
-        private User assigner = null;
+        @Column(name="assigner")
+        private String assigner = null;
+        
+        @JsonProperty("assignee")
+        @Column(name="assignee")
+        private String assignee = null;
 
-        @JsonProperty("assignes")
-        @Transient
+
+       @Transient
         private List<User> assignes = null;
 
         @JsonProperty("stateSla")
