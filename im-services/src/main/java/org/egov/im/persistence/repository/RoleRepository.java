@@ -1,29 +1,19 @@
 package org.egov.im.persistence.repository;
 
-import static java.util.Objects.isNull;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.egov.im.entity.Role;
 import org.egov.im.repository.querybuilder.RoleQueryBuilder;
 import org.egov.im.repository.rowmapper.RoleRowMapper;
 import org.egov.im.repository.rowmapper.UserRoleRowMapper;
-
-import org.egov.tracer.model.CustomException;
-import org.egov.im.entity.Role;
-
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Setter;

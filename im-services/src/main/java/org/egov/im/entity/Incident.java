@@ -40,8 +40,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-@Entity	
+@Entity
 @Table(name = "eg_incident_v2")
 public class Incident {
 	

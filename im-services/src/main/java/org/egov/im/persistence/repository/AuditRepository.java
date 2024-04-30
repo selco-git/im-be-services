@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.egov.im.entity.User;
 import org.egov.im.domain.model.enums.BloodGroup;
 import org.egov.im.domain.model.enums.Gender;
 import org.egov.im.domain.model.enums.GuardianRelation;
 import org.egov.im.domain.model.enums.UserType;
+import org.egov.im.entity.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;

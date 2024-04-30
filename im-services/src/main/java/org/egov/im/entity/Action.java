@@ -46,7 +46,7 @@ import lombok.ToString;
 @Entity
 @Table(name="eg_wf_action_v2")
 @EqualsAndHashCode(of = {"currentState","action"})
-public class Action  implements Serializable {
+public class Action {
 
         @Size(max=256)
         @Id

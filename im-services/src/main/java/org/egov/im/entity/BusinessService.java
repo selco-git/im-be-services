@@ -48,7 +48,7 @@ import lombok.ToString;
 @Table(name="eg_wf_businessservice_v2")
 @EqualsAndHashCode(of = {"tenantId","businessService"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BusinessService implements Serializable  {
+public class BusinessService {
 
 	  @NotNull
       @Size(max=256)

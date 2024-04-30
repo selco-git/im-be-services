@@ -26,6 +26,7 @@ import org.egov.im.domain.exception.UserNotFoundException;
 import org.egov.im.domain.exception.UserProfileUpdateDeniedException;
 import org.egov.im.domain.model.LoggedInUserUpdatePasswordRequest;
 import org.egov.im.domain.model.NonLoggedInUserUpdatePasswordRequest;
+import org.egov.im.domain.model.Token;
 import org.egov.im.domain.model.UserSearchCriteria;
 import org.egov.im.domain.model.enums.UserType;
 import org.egov.im.entity.User;
@@ -33,6 +34,7 @@ import org.egov.im.persistence.dto.FailedLoginAttempt;
 import org.egov.im.persistence.repository.OtpRepository;
 import org.egov.im.persistence.repository.UserRepository;
 import org.egov.im.web.contract.Otp;
+import org.egov.im.web.contract.OtpResponse;
 import org.egov.im.web.contract.OtpValidateRequest;
 import org.egov.im.web.models.RequestInfo;
 import org.egov.tracer.model.CustomException;
@@ -64,6 +66,9 @@ public class UserService {
     private boolean isCitizenLoginOtpBased;
     private boolean isEmployeeLoginOtpBased;
     private TokenStore tokenStore;
+    
+    @Autowired
+    private TokenService tokenService;
 
     @Value("${egov.user.host}")
     private String userHost;
@@ -95,7 +100,6 @@ public class UserService {
 
 
     public UserService(UserRepository userRepository, OtpRepository otpRepository,                        PasswordEncoder passwordEncoder, 
-                       //EncryptionDecryptionUtil encryptionDecryptionUtil, 
                        TokenStore tokenStore,
                        @Value("${default.password.expiry.in.days}") int defaultPasswordExpiryInDays,
                        @Value("${citizen.login.password.otp.enabled}") boolean isCitizenLoginOtpBased,
@@ -338,9 +342,17 @@ public class UserService {
         RequestInfo requestInfo = RequestInfo.builder().action("validate").ts(System.currentTimeMillis()).build();
         OtpValidateRequest otpValidationRequest = OtpValidateRequest.builder().requestInfo(requestInfo).otp(otp)
                 .build();
-        return otpRepository.validateOtp(otpValidationRequest);
+        Token token=tokenService.validate(otpValidationRequest.toDomainValidateRequest());
+        token.setNumber(otpValidationRequest.toDomainValidateRequest().getOtp());
+        OtpResponse otpResponse= new OtpResponse(token);
+        if (null != otpResponse && null != otpResponse.getOtp())
+            return otpResponse.getOtp().isValidationSuccessful();
+        else
+            return false;
 
     }
+    
+    
 
 
     /**
