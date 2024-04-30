@@ -52,7 +52,7 @@ import lombok.ToString;
 @EqualsAndHashCode(of = {"tenantId","businessServiceId","state"})
 @Entity
 @Table(name="eg_wf_state_v2")
-public class State  implements Serializable {
+public class State {
 
 	    @Id
         @Size(max=256)
